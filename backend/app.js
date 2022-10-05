@@ -1,11 +1,29 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const sequelize = require('./utils/database');
+const cors = require('cors');
+const userRoute = require('./src/users/router/user.router');
 
 dotenv.config();
 const port = process.env.PORT;
 
 const app = express();
+let corsOption = {
+  origin: 'https//localhost:3000',
+};
 
-app.listen(port, () => {
-  console.log(`[server]: server is running at http://localhost:${port}`);
-});
+app.use(express.json());
+app.use(cors(corsOption))
+
+app.use('/users', userRoute);
+
+sequelize
+  .sync()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`[server]: Server is running at http://localhost:${port}`);
+    });
+  })
+  .catch((e) => {
+    console.log(e);
+  });
