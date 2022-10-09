@@ -78,7 +78,7 @@ exports.getAllUser = (req, res, next) => {
       if (users.length) {
         res.status(200).json({ message: message.USER_LIST_FETCH, users });
       } else {
-        res.status(500).json({ message: message.SOMETHING_WENT_WRONG });
+        res.status(404).json({ message: message.USER_NOT_FOUND });
       }
     })
     .catch((e) => {
@@ -89,7 +89,7 @@ exports.getAllUser = (req, res, next) => {
 exports.editUser = (req, res, next) => {
   const id = req.params.id;
 
-  // get the all user properties except the password.
+  // get all the user properties except the password.
   let { password, ...body } = req.body;
 
   User.update(body, {
