@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const Sequelize = require('sequelize');
 const User = require('../model/user.model');
-const message = require('../../../utils/localize');
+const message = require('../../../utils/constants');
 
 exports.addUser = (req, res, next) => {
   const {
@@ -78,48 +78,28 @@ exports.getAllUser = (req, res, next) => {
       if (users.length) {
         res.status(200).json({ message: message.USER_LIST_FETCH, users });
       } else {
-        res.status(200).json({ message: message.SOMETHING_WENT_WRONG });
+        res.status(500).json({ message: message.SOMETHING_WENT_WRONG });
       }
     })
     .catch((e) => {
       res.status(500).json({ message: message.SOMETHING_WENT_WRONG, error: e });
     });
 };
+
 exports.editUser = (req, res, next) => {
   const id = req.params.id;
-  const {
-    username,
-    firstName,
-    lastName,
-    street,
-    addressOne,
-    addressTwo,
-    city,
-    state,
-    email,
-  } = req.body;
-  User.update(
-    {
-      username,
-      firstName,
-      lastName,
-      street,
-      addressOne,
-      addressTwo,
-      city,
-      state,
-      email,
+
+  // get the all user properties except the password.
+  let { password, ...body } = req.body;
+
+  User.update(body, {
+    where: {
+      id: id,
     },
-    {
-      where: {
-        id: id,
-      },
-      returning: true,
-      plain: true,
-    }
-  )
+    returning: true,
+    plain: true,
+  })
     .then((user) => {
-      console.log('user: ', user);
       if (!user) {
         res.status(404).json({ message: message.USER_NOT_FOUND });
         return;
@@ -138,7 +118,7 @@ exports.deleteUser = (req, res, next) => {
       if (!user) {
         const error = new Error();
         error.statusCode = 404;
-        error.message = message.USER_EXIST;
+        error.message = message.USER_NOT_FOUND;
         throw error;
       }
 
@@ -148,7 +128,42 @@ exports.deleteUser = (req, res, next) => {
       res.status(200).json({ message: message.USER_DELETE });
     })
     .catch((e) => {
-      console.log('e: ', e);
+      res.status(500).json({ message: message.SOMETHING_WENT_WRONG, error: e });
+    });
+};
+
+exports.getUser = (req, res, next) => {
+  const id = req.params.id;
+  User.findOne({
+    where: { id: id },
+    attributes: [
+      [
+        Sequelize.fn(
+          'concat',
+          Sequelize.col('firstName'),
+          ' ',
+          Sequelize.col('lastName')
+        ),
+        'fullName',
+      ],
+      'username',
+      'email',
+      'addressOne',
+      'addressTwo',
+      'street',
+      'city',
+      'state',
+      'id',
+    ],
+  })
+    .then((user) => {
+      if (!user) {
+        res.status(404).json({ message: message.USER_NOT_FOUND });
+        return;
+      }
+      res.status(200).json({ message: message.USER_FOUND, user });
+    })
+    .catch((e) => {
       res.status(500).json({ message: message.SOMETHING_WENT_WRONG, error: e });
     });
 };
