@@ -13,7 +13,7 @@ let corsOption = {
 };
 
 app.use(express.json());
-app.use(cors(corsOption))
+app.use(cors(corsOption));
 
 app.use('/users', userRoute);
 
@@ -27,3 +27,5 @@ sequelize
   .catch((e) => {
     console.log(e);
   });
+
+module.exports = app;
