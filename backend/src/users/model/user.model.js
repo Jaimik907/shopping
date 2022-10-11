@@ -1,5 +1,5 @@
-const Sequelize = require("sequelize");
-const sequelize = require("../../../utils/database");
+const Sequelize = require('sequelize');
+const sequelize = require('../../../utils/database');
 
 const User = sequelize.define('user', {
   id: {
@@ -45,6 +45,14 @@ const User = sequelize.define('user', {
     type: Sequelize.STRING,
     allowNull: false,
   },
-})
+  isActive: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: true,
+  },
+  lastLogin: {
+    type: Sequelize.TIMESTAMP,
+    allowNull: false,
+  },
+});
 
 module.exports = User;
