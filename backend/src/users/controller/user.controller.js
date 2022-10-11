@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const Sequelize = require('sequelize');
 const User = require('../model/user.model');
+const { validationResult } = require('express-validator/check');
 const message = require('../../../utils/constants');
 
 exports.addUser = (req, res, next) => {
@@ -92,6 +93,13 @@ exports.editUser = (req, res, next) => {
   // get all the user properties except the password.
   let { password, ...body } = req.body;
 
+  const error = validationResult(req);
+
+  if (!error.isEmpty()) {
+    res.status(422).json({ message: error.array()[0].msg });
+    return;
+  }
+
   User.update(body, {
     where: {
       id: id,
@@ -112,7 +120,7 @@ exports.editUser = (req, res, next) => {
 };
 
 exports.deleteUser = (req, res, next) => {
-  const id = req.params.id;
+  const id = req.params.userId;
   User.findOne({ where: { id: id } })
     .then((user) => {
       if (!user) {
@@ -166,4 +174,55 @@ exports.getUser = (req, res, next) => {
     .catch((e) => {
       res.status(500).json({ message: message.SOMETHING_WENT_WRONG, error: e });
     });
+};
+
+// soft delete
+exports.disableUser = (req, res, next) => {
+  const id = req.params.id;
+  User.findOne({ where: { id: id } }).then((user) => {
+    if (!user) {
+      res.status(404).json({ message: message.USER_NOT_FOUND });
+      return;
+    }
+
+    let isActive = false;
+    User.update({ isActive: isActive }, { where: { id: id } })
+      .then((user) => {
+        if (!user) {
+          res.status(404).json({ message: message.USER_NOT_FOUND });
+          return;
+        }
+        res.status(200).json({ message: message.USER_DELETE });
+      })
+      .catch((e) => {
+        res
+          .status(500)
+          .json({ message: message.SOMETHING_WENT_WRONG, error: e });
+      });
+  });
+};
+
+exports.activateUser = (req, res, next) => {
+  const id = req.params.id;
+  User.findOne({ where: { id: id } }).then((user) => {
+    if (!user) {
+      res.status(404).json({ message: message.USER_NOT_FOUND });
+      return;
+    }
+
+    let isActive = true;
+    User.update({ isActive: isActive }, { where: { id: id } })
+      .then((user) => {
+        if (!user) {
+          res.status(404).json({ message: message.USER_NOT_FOUND });
+          return;
+        }
+        res.status(200).json({ message: message.USER_ACTIVATED });
+      })
+      .catch((e) => {
+        res
+          .status(500)
+          .json({ message: message.SOMETHING_WENT_WRONG, error: e });
+      });
+  });
 };

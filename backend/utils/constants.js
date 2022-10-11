@@ -6,3 +6,5 @@ exports.USER_DELETE = 'User deleted successfully.';
 exports.USER_DETAILS_UPDATED = 'User details update successfully.';
 exports.USER_NOT_FOUND = 'User does not exist!';
 exports.USER_FOUND = 'User found successfully!';
+exports.NOT_VALID_EMAIL = 'Please enter valid email';
+exports.USER_ACTIVATED = 'User is activated.';
