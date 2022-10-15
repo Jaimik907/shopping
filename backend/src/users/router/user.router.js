@@ -1,41 +1,40 @@
+// imports
 const express = require('express');
-const { body, check } = require('express-validator/check');
-const message = require('../../../utils/constants');
+const { param } = require('express-validator');
 const userController = require('../controller/user.controller');
+const verifyToken = require('../../../middleware/auth');
+const userSchema = require('../../../middleware/users-validation');
 
 const router = express.Router();
 
-router.get('/', userController.getAllUser);
-const testEmail = 'test@test.com';
-router.post(
-  '/add',
-  [
-    body('email', message.VALID_EMAIL)
-      .isEmail()
-      .custom((value, { req, res }) => {
-        if (value === testEmail) {
-          res.status(500).json({ message: 'This email is forbidden!' });
-        }
-      }),
-  ],
-  userController.addUser
-);
+// routes
+router.get('/', verifyToken, userController.getAllUser);
+router.post('/add', verifyToken, userSchema, userController.addUser);
 router.put(
   '/edit/:id',
-  check('email')
-    .isEmail()
-    .withMessage(message.NOT_VALID_EMAIL)
-    .custom((value, { req }) => {
-      if (value === testEmail) {
-        throw new Error(message.NOT_VALID_EMAIL);
-      }
-      return true;
-    }),
+  verifyToken,
+  [param('id').exists()],
+  userSchema,
   userController.editUser
 );
-router.delete('/delete-user/:userId', userController.deleteUser);
-router.get('/:id', userController.getUser);
-router.delete('/delete/:id', userController.disableUser);
-router.put('/activate/:id', userController.activateUser);
+router.delete(
+  '/delete-user/:userId',
+  verifyToken,
+  [param('userId').exists()],
+  userController.deleteUser
+);
+router.get('/:id', verifyToken, [param('id').exists()], userController.getUser);
+router.delete(
+  '/delete/:id',
+  verifyToken,
+  [param('id').exists()],
+  userController.disableUser
+);
+router.put(
+  '/activate/:id',
+  verifyToken,
+  [param('id').exists()],
+  userController.activateUser
+);
 
 module.exports = router;
