@@ -49,8 +49,13 @@ const User = sequelize.define('user', {
     type: Sequelize.BOOLEAN,
     defaultValue: true,
   },
-  lastLogin: {
-    type: Sequelize.TIMESTAMP,
+  registeredDate: {
+    type: 'TIMESTAMP',
+    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    allowNull: false
+  },
+  userType: {
+    type: Sequelize.STRING,
     allowNull: false,
   },
 });

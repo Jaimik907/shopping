@@ -18,6 +18,13 @@ exports.addUser = (req, res, next) => {
     email,
   } = req.body;
 
+  const error = validationResult(req);
+
+  if (!error.isEmpty()) {
+    res.status(422).json({ message: error.array()[0].msg });
+    return;
+  }
+
   User.findOne({ where: { email: email } })
     .then((user) => {
       if (user) {
@@ -39,6 +46,7 @@ exports.addUser = (req, res, next) => {
             city,
             state,
             email,
+            registeredDate: Date.now(),
           });
         })
         .then(() => {
@@ -90,10 +98,11 @@ exports.getAllUser = (req, res, next) => {
 exports.editUser = (req, res, next) => {
   const id = req.params.id;
 
-  // get all the user properties except the password.
+  // Get all the user properties from request body except the password.
   let { password, ...body } = req.body;
 
   const error = validationResult(req);
+  console.log('error: ', error);
 
   if (!error.isEmpty()) {
     res.status(422).json({ message: error.array()[0].msg });
