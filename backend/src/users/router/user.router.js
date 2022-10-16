@@ -23,7 +23,7 @@ router.delete(
   [param('userId').exists()],
   userController.deleteUser
 );
-router.get('/:id', verifyToken, [param('id').exists()], userController.getUser);
+router.get('/:id', verifyToken, [param('id', 'Id shold be exist').exists()], userController.getUser);
 router.delete(
   '/delete/:id',
   verifyToken,

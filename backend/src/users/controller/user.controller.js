@@ -4,15 +4,17 @@ const User = require('../model/user.model');
 const { validationResult } = require('express-validator/check');
 const message = require('../../../utils/constants');
 
+const userType = ['Admin', 'Super Admin', 'User'];
+
 exports.addUser = (req, res, next) => {
   const {
     username,
     password,
-    firstName,
-    lastName,
+    firstname,
+    lastname,
     street,
-    addressOne,
-    addressTwo,
+    address_one,
+    address_two,
     city,
     state,
     email,
@@ -22,6 +24,13 @@ exports.addUser = (req, res, next) => {
 
   if (!error.isEmpty()) {
     res.status(422).json({ message: error.array()[0].msg });
+    return;
+  }
+
+  const user = req.user;
+
+  if (user.userType === 'User') {
+    res.status(401).json({ message: message.ACCESS_DENIED });
     return;
   }
 
@@ -38,30 +47,40 @@ exports.addUser = (req, res, next) => {
           return User.create({
             username,
             password: encryptedPassword,
-            firstName,
-            lastName,
-            addressOne,
-            addressTwo,
+            firstName: firstname,
+            lastName: lastname,
+            addressOne: address_one,
+            addressTwo: address_two,
             street,
             city,
             state,
             email,
-            registeredDate: Date.now(),
+            userType: userType[2],
           });
         })
         .then(() => {
           res.status(200).json({ message: message.USER_CREATED });
         })
         .catch((e) => {
-          res.status(500).json({ error: e.errors });
+          res
+            .status(500)
+            .json({ message: message.SOMETHING_WENT_WRONG, error: e.errors });
         });
     })
-    .catch((e) =>
-      res.status(500).json({ message: message.SOMETHING_WENT_WRONG, error: e })
-    );
+    .catch((e) => {
+      res.status(500).json({ message: message.SOMETHING_WENT_WRONG, error: e });
+    });
 };
 
 exports.getAllUser = (req, res, next) => {
+  // get user details from token
+  const user = req.user;
+
+  if (user.userType === 'User') {
+    res.status(401).json({ message: message.ACCESS_DENIED });
+    return;
+  }
+
   User.findAll({
     attributes: [
       [
@@ -98,11 +117,18 @@ exports.getAllUser = (req, res, next) => {
 exports.editUser = (req, res, next) => {
   const id = req.params.id;
 
+  // get user details from token
+  const user = req.user;
+
+  if (user.userType === 'User') {
+    res.status(401).json({ message: message.ACCESS_DENIED });
+    return;
+  }
+
   // Get all the user properties from request body except the password.
   let { password, ...body } = req.body;
 
   const error = validationResult(req);
-  console.log('error: ', error);
 
   if (!error.isEmpty()) {
     res.status(422).json({ message: error.array()[0].msg });
@@ -121,7 +147,7 @@ exports.editUser = (req, res, next) => {
         res.status(404).json({ message: message.USER_NOT_FOUND });
         return;
       }
-      res.status(200).json({ message: message.USER_DETAILS_UPDATED, user });
+      res.status(200).json({ message: message.USER_DETAILS_UPDATED });
     })
     .catch((e) => {
       res.status(500).json({ message: message.SOMETHING_WENT_WRONG, error: e });
@@ -130,6 +156,14 @@ exports.editUser = (req, res, next) => {
 
 exports.deleteUser = (req, res, next) => {
   const id = req.params.userId;
+  // get user details from token
+  const user = req.user;
+
+  if (user.userType === 'User') {
+    res.status(401).json({ message: message.ACCESS_DENIED });
+    return;
+  }
+
   User.findOne({ where: { id: id } })
     .then((user) => {
       if (!user) {
@@ -188,6 +222,12 @@ exports.getUser = (req, res, next) => {
 // soft delete
 exports.disableUser = (req, res, next) => {
   const id = req.params.id;
+  const user = req.user;
+
+  if (user.userType === 'User') {
+    res.status(401).json({ message: message.ACCESS_DENIED });
+    return;
+  }
   User.findOne({ where: { id: id } }).then((user) => {
     if (!user) {
       res.status(404).json({ message: message.USER_NOT_FOUND });
@@ -213,6 +253,13 @@ exports.disableUser = (req, res, next) => {
 
 exports.activateUser = (req, res, next) => {
   const id = req.params.id;
+  const user = req.user;
+
+  if (user.userType === 'User') {
+    res.status(401).json({ message: message.ACCESS_DENIED });
+    return;
+  }
+
   User.findOne({ where: { id: id } }).then((user) => {
     if (!user) {
       res.status(404).json({ message: message.USER_NOT_FOUND });
