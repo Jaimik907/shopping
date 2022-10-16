@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "root",
+    "password": "root",
+    "database": "shopping",
+    "host": "localhost",
+    "dialect": "mysql"
+  }
+}

@@ -21,7 +21,7 @@ const schema = [
       }
       return true;
     }),
-  body('firstName')
+  body('firstname')
     .exists()
     // .matches(/^[A-Za-z\s]+$/)
     .isAlpha()
@@ -36,7 +36,7 @@ const schema = [
       }
       return true;
     }),
-  body('lastName')
+  body('lastname')
     .exists()
     .matches(/^[A-Za-z\s]+$/)
     .withMessage(message.LAST_ONLY_STRING_CONTAINS)
@@ -62,7 +62,7 @@ const schema = [
       }
       return true;
     }),
-  body(['addressOne', 'street', 'city', 'state'])
+  body(['address_one', 'street', 'city', 'state'])
     .exists()
     .custom((value, { req }) => {
       if (value.length > 70) {

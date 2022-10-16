@@ -52,7 +52,7 @@ const User = sequelize.define('user', {
   registeredDate: {
     type: 'TIMESTAMP',
     defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-    allowNull: false
+    allowNull: false,
   },
   userType: {
     type: Sequelize.STRING,
