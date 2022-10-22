@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './App.css';
-import CartContainer from './components/CartContainer';
-import Navbar from './components/Navbar';
+import { useAuth } from './context/authProvider';
 import { calculateTotals } from './features/cart/cartSlice';
+import AppRouting from './routes/routing';
 import { RootState } from './store/store';
 
 function App() {
@@ -11,15 +11,10 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(calculateTotals())
-  }, [cartItems, dispatch])
+    dispatch(calculateTotals());
+  }, [cartItems, dispatch]);
 
-  return (
-    <div className='App'>
-      <Navbar />
-      <CartContainer />
-    </div>
-  );
+  return <AppRouting />;
 }
 
 export default App;
