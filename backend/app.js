@@ -16,8 +16,8 @@ let corsOption = {
 app.use(express.json());
 app.use(cors(corsOption));
 
-app.use('/users', userRoute);
-app.use('/auth',authRoute);
+app.use('/v1/users', userRoute);
+app.use('/v1/auth', authRoute);
 
 sequelize
   .sync()

@@ -69,6 +69,7 @@ exports.login = (req, res, next) => {
           });
         })
         .catch((e) => {
+          console.log('e: ', e);
           res
             .status(500)
             .json({ message: message.SOMETHING_WENT_WRONG, err: e });
